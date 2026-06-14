@@ -3726,6 +3726,185 @@ const MealPickerSearch = ({ recipes, defaultMealType, onSelect, familyId, select
 };
 
 // ─── RECIPE SEARCH ────────────────────────────────────────────────────────────
+const KITCHEN_MEAL_SUGGESTIONS = [
+  { name:"Poha",                cuisine:"Indian",       tags:"breakfast,quick",     icon:"🍚" },
+  { name:"Upma",                cuisine:"Indian",       tags:"breakfast,quick",     icon:"🥣" },
+  { name:"Aloo Paratha",        cuisine:"Punjabi",      tags:"breakfast,kids",      icon:"🫓" },
+  { name:"Moong Dal Chilla",    cuisine:"Indian",       tags:"breakfast,healthy",   icon:"🥞" },
+  { name:"Rava Idli",           cuisine:"South Indian", tags:"breakfast",           icon:"🫓" },
+  { name:"Besan Cheela",        cuisine:"Indian",       tags:"breakfast,healthy",   icon:"🥞" },
+  { name:"Sabudana Khichdi",    cuisine:"Indian",       tags:"breakfast,fasting",   icon:"🍚" },
+  { name:"Dal Makhani",         cuisine:"Punjabi",      tags:"dinner,restaurant",   icon:"🫘" },
+  { name:"Paneer Butter Masala",cuisine:"Punjabi",      tags:"dinner,kids",         icon:"🧀" },
+  { name:"Chole Bhature",       cuisine:"Punjabi",      tags:"lunch,weekend",       icon:"🍛" },
+  { name:"Rajma Chawal",        cuisine:"Punjabi",      tags:"lunch,comfort",       icon:"🫘" },
+  { name:"Palak Paneer",        cuisine:"Indian",       tags:"dinner,healthy",      icon:"🥬" },
+  { name:"Khichdi",             cuisine:"Indian",       tags:"dinner,kids,healthy", icon:"🍚" },
+  { name:"Pav Bhaji",           cuisine:"Mumbai",       tags:"dinner,kids",         icon:"🍞" },
+  { name:"Biryani",             cuisine:"Mughlai",      tags:"weekend,special",     icon:"🍛" },
+  { name:"Baingan Bharta",      cuisine:"Punjabi",      tags:"dinner",              icon:"🍆" },
+  { name:"Aloo Gobi",           cuisine:"Indian",       tags:"lunch,quick",         icon:"🥦" },
+  { name:"Matar Paneer",        cuisine:"Indian",       tags:"dinner",              icon:"🧀" },
+  { name:"Dal Tadka",           cuisine:"Indian",       tags:"lunch,healthy",       icon:"🫘" },
+  { name:"Jeera Rice",          cuisine:"Indian",       tags:"lunch,quick",         icon:"🍚" },
+  { name:"Idli Sambar",         cuisine:"South Indian", tags:"breakfast,kids",      icon:"🫓" },
+  { name:"Masala Dosa",         cuisine:"South Indian", tags:"breakfast,weekend",   icon:"🌯" },
+  { name:"Rava Dosa",           cuisine:"South Indian", tags:"breakfast,quick",     icon:"🌯" },
+  { name:"Uttapam",             cuisine:"South Indian", tags:"breakfast",           icon:"🥞" },
+  { name:"Pasta in White Sauce",cuisine:"Italian",      tags:"kids,dinner",         icon:"🍝" },
+  { name:"Veg Sandwich",        cuisine:"Snack",        tags:"kids,quick",          icon:"🥪" },
+  { name:"Paneer Frankie",      cuisine:"Mumbai",       tags:"kids,lunch",          icon:"🌯" },
+  { name:"Quinoa Salad",        cuisine:"Healthy",      tags:"healthy,lunch",       icon:"🥗" },
+  { name:"Sprouts Chaat",       cuisine:"Indian",       tags:"healthy,snack",       icon:"🌱" },
+  { name:"Oats Upma",           cuisine:"Healthy",      tags:"healthy,breakfast",   icon:"🥣" },
+  { name:"Lauki Soup",          cuisine:"Healthy",      tags:"healthy,dinner",      icon:"🍵" },
+];
+
+const KITCHEN_CUISINES = ["All","Indian","Punjabi","South Indian","Mumbai","Healthy","Italian"];
+
+const KitchenRecipeDiscovery = ({ recipes, familyId, onAdded }) => {
+  const [search, setSearch]           = useState("");
+  const [cuisine, setCuisine]         = useState("All");
+  const [showNewOnly, setShowNewOnly] = useState(true);
+  const [adding, setAdding]           = useState(null);
+  const [showManual, setShowManual]   = useState(false);
+  const [form, setForm]               = useState({ name:"", cuisine:"Indian", tags:"", notes:"" });
+  const [saving, setSaving]           = useState(false);
+
+  const existingNames = useMemo(() =>
+    new Set((recipes||[]).map(r => r.name.toLowerCase().trim()))
+  , [recipes]);
+
+  const isNew = meal => !existingNames.has(meal.name.toLowerCase().trim());
+  const newCount = KITCHEN_MEAL_SUGGESTIONS.filter(m => isNew(m)).length;
+
+  const filtered = useMemo(() => {
+    let list = KITCHEN_MEAL_SUGGESTIONS;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(m => m.name.toLowerCase().includes(q) || m.tags.includes(q) || m.cuisine.toLowerCase().includes(q));
+    }
+    if (cuisine !== "All") list = list.filter(m => m.cuisine === cuisine || m.tags.includes(cuisine.toLowerCase()));
+    if (showNewOnly) list = list.filter(m => isNew(m));
+    return list;
+  }, [search, cuisine, showNewOnly, existingNames]);
+
+  const addToDB = async (meal) => {
+    setAdding(meal.name);
+    await supabase.from("recipes").insert({
+      family_id: familyId, name: meal.name, cuisine_type: meal.cuisine,
+      tags: meal.tags.split(","), meal_type: meal.tags.split(",")[0] || "lunch",
+      prep_time_minutes: 30, is_vegetarian: true, notes: "",
+    });
+    setAdding(null);
+    onAdded();
+  };
+
+  const addManualToDB = async () => {
+    if (!form.name.trim()) return;
+    setSaving(true);
+    await supabase.from("recipes").insert({
+      family_id: familyId, name: form.name.trim(), cuisine_type: form.cuisine,
+      tags: form.tags.split(",").map(t=>t.trim()).filter(Boolean),
+      meal_type: form.tags.split(",")[0] || "lunch",
+      prep_time_minutes: 30, is_vegetarian: true, notes: form.notes,
+    });
+    setSaving(false);
+    setForm({ name:"", cuisine:"Indian", tags:"", notes:"" });
+    setShowManual(false);
+    onAdded();
+  };
+
+  return (
+    <div style={{ marginBottom:16 }}>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:12 }}>
+        {[
+          { l:"In DB",    v:(recipes||[]).length,              c:T.accent },
+          { l:"Not in DB",v:newCount,                          c:T.amber  },
+          { l:"Total",    v:KITCHEN_MEAL_SUGGESTIONS.length,   c:T.green  },
+        ].map(s => (
+          <div key={s.l} style={{ background:T.card, borderRadius:10, padding:"10px 8px", textAlign:"center", border:`1px solid ${T.border}` }}>
+            <div style={{ fontSize:18, fontWeight:800, color:s.c }}>{s.v}</div>
+            <div style={{ fontSize:10, color:T.muted, marginTop:2 }}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ background:T.card, borderRadius:14, padding:14, marginBottom:12, border:`1px solid ${T.border}` }}>
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          placeholder="Search meals..." className="input" style={{ marginBottom:10 }} />
+        <div className="scroll-x" style={{ gap:6, display:"flex", marginBottom:8 }}>
+          {KITCHEN_CUISINES.map(c => (
+            <div key={c} onClick={() => setCuisine(c)}
+              className={"chip " + (cuisine===c?"on":"")}
+              style={{ fontSize:12, whiteSpace:"nowrap" }}>{c}</div>
+          ))}
+        </div>
+        <button onClick={() => setShowNewOnly(p => !p)}
+          style={{ padding:"7px 14px", borderRadius:10, fontSize:12, fontWeight:700, cursor:"pointer", fontFamily:"inherit", border:"1.5px solid " + (showNewOnly?"#d97706":T.border), background:showNewOnly?"#fef3c7":T.card, color:showNewOnly?"#92400e":T.muted }}>
+          {showNewOnly?"✓ ":""}Not in DB only ({newCount})
+        </button>
+      </div>
+      <button onClick={() => setShowManual(p => !p)}
+        style={{ width:"100%", padding:"10px", borderRadius:12, border:"1.5px dashed "+T.accent, background:"transparent", color:T.accent, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", marginBottom:12 }}>
+        {showManual ? "✕ Cancel" : "✏️ + Add custom meal not in list"}
+      </button>
+      {showManual && (
+        <div style={{ background:T.card, borderRadius:14, padding:16, border:"1.5px solid "+T.accent, marginBottom:12 }}>
+          <input value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))}
+            placeholder="Meal name" className="input" style={{ marginBottom:8 }} />
+          <div style={{ display:"flex", gap:8, marginBottom:8 }}>
+            <select value={form.cuisine} onChange={e=>setForm(p=>({...p,cuisine:e.target.value}))}
+              className="input" style={{ flex:1 }}>
+              {["Indian","Punjabi","South Indian","Mumbai","Healthy","Italian","Chinese","Other"].map(c=><option key={c}>{c}</option>)}
+            </select>
+            <input value={form.tags} onChange={e=>setForm(p=>({...p,tags:e.target.value}))}
+              placeholder="Tags (breakfast,kids)" className="input" style={{ flex:1 }} />
+          </div>
+          <input value={form.notes} onChange={e=>setForm(p=>({...p,notes:e.target.value}))}
+            placeholder="Notes (optional)" className="input" style={{ marginBottom:10 }} />
+          <button onClick={addManualToDB} disabled={saving||!form.name.trim()}
+            className="btn-primary" style={{ width:"100%", height:44, fontSize:14, color:"#fff", fontWeight:700 }}>
+            {saving ? "Saving..." : "+ Add to Family OS"}
+          </button>
+        </div>
+      )}
+      <div style={{ fontSize:12, color:T.muted, fontWeight:600, marginBottom:8 }}>
+        {filtered.length} meals · {filtered.filter(m=>isNew(m)).length} not in DB
+      </div>
+      {filtered.map(meal => {
+        const inDB = !isNew(meal);
+        const isAdding = adding === meal.name;
+        return (
+          <div key={meal.name} style={{ display:"flex", alignItems:"center", gap:10, padding:"12px 14px", borderRadius:12, border:"1px solid "+(inDB?"#86efac":T.border), marginBottom:8, background:inDB?"#f0fdf4":T.card }}>
+            <div style={{ fontSize:22, flexShrink:0 }}>{meal.icon}</div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
+                <span style={{ fontSize:15, fontWeight:700, color:T.text }}>{meal.name}</span>
+                {inDB
+                  ? <span style={{ fontSize:10, padding:"2px 7px", borderRadius:20, background:"#dcfce7", color:"#15803d", fontWeight:700 }}>✓ In DB</span>
+                  : <span style={{ fontSize:10, padding:"2px 7px", borderRadius:20, background:"#fef3c7", color:"#92400e", fontWeight:700 }}>New</span>}
+              </div>
+              <div style={{ fontSize:12, color:T.muted, marginTop:2 }}>{meal.cuisine} · {meal.tags.split(",").join(" · ")}</div>
+            </div>
+            <div style={{ display:"flex", gap:6, flexShrink:0 }}>
+              <button onClick={() => window.open("https://www.google.com/search?q="+encodeURIComponent(meal.name+" recipe"),"_blank")}
+                style={{ padding:"7px 10px", borderRadius:9, border:"1px solid "+T.border, background:T.bg, color:T.muted, fontSize:13, cursor:"pointer" }}>🔍</button>
+              {!inDB && (
+                <button onClick={() => addToDB(meal)} disabled={isAdding}
+                  className="btn-primary"
+                  style={{ padding:"7px 12px", borderRadius:9, fontSize:12, fontWeight:700, color:"#fff", opacity:isAdding?0.6:1 }}>
+                  {isAdding ? "..." : "+ Add"}
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+
 const RecipeSearch = ({ recipes, pantry, familyId, todayStr, mealPlan, onAssign, onViewRecipe }) => {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -4375,6 +4554,7 @@ const HealthAnalysisTab = ({ familyId }) => {
 // ─── KITCHEN SCREEN ───────────────────────────────────────────────────────────
 const KitchenScreen = ({ familyId }) => {
   const [tab, setTab] = useState("today");
+  const [showDiscover, setShowDiscover] = useState(false);
   const [seeded, setSeeded] = useState(false);
   const [cooking, setCooking] = useState(null);
   const [addMealModal, setAddMealModal] = useState(null);
@@ -4682,15 +4862,34 @@ const KitchenScreen = ({ familyId }) => {
 
         {/* RECIPES */}
         {tab==="recipes" && (
-          <RecipeSearch
-            recipes={recipes}
-            pantry={pantry}
-            familyId={familyId}
-            todayStr={todayStr}
-            mealPlan={mealPlan}
-            onAssign={assignRecipe}
-            onViewRecipe={async(r)=>{ setSelectedRecipe(r); setRecipeServings(r.servings||2); const {data} = await supabase.from("recipe_ingredients").select("*").eq("recipe_id",r.id); setRecipeIngredients(data||[]); }}
-          />
+          <div>
+            <button
+              onClick={() => setShowDiscover(p => !p)}
+              style={{ width:"100%", padding:"11px", borderRadius:12, border:`1.5px dashed ${T.accent}`, background: showDiscover ? T.accent : "#ede9fe", color: showDiscover ? "#fff" : T.accent, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", marginBottom:12 }}>
+              {showDiscover ? "✕ Close Discover" : "✨ Discover & Add New Meals to DB"}
+            </button>
+            {showDiscover && (
+              <KitchenRecipeDiscovery
+                recipes={recipes}
+                familyId={familyId}
+                onAdded={() => {
+                  setShowDiscover(false);
+                  showToast({ title:"✓ Recipe Added!", body:"New meal added to your recipe DB.", icon:"🍽", color:T.green });
+                }}
+              />
+            )}
+            {!showDiscover && (
+              <RecipeSearch
+                recipes={recipes}
+                pantry={pantry}
+                familyId={familyId}
+                todayStr={todayStr}
+                mealPlan={mealPlan}
+                onAssign={assignRecipe}
+                onViewRecipe={async(r)=>{ setSelectedRecipe(r); setRecipeServings(r.servings||2); const {data} = await supabase.from("recipe_ingredients").select("*").eq("recipe_id",r.id); setRecipeIngredients(data||[]); }}
+              />
+            )}
+          </div>
         )}
 
         {/* PANTRY */}

@@ -120,7 +120,6 @@ const TABS = [
   { id: 'cart',    label: '🛒 Cart'     },
   { id: 'compare', label: '⚡ Compare'  },
   { id: 'history', label: '📋 History'  },
-  { id: 'recipes', label: '🍽️ Recipes'  },
 ];
 
 const MEAL_SUGGESTIONS = [
@@ -168,9 +167,6 @@ export default function SmartGrocery({ familyId }) {
   const [recipes, setRecipes]     = useState([]);
   const [recipeIngr, setRecipeIngr] = useState([]);
   const [cart, setCart]           = useState([]);            // [{item, suggestedQty}]
-  const [recipeQuery, setRecipeQuery]     = useState('');
-  const [recipeFilters, setRecipeFilters] = useState([]);
-  const [recipeSite, setRecipeSite]       = useState('');
   const [compareRes, setCompareRes] = useState(null);
   const [loading, setLoading]     = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -722,17 +718,7 @@ export default function SmartGrocery({ familyId }) {
           </>
         )}
 
-        {/* ══════════════════════════════════════════════════════════════════
-            TAB: RECIPES — Discover & Log New Meals
-        ══════════════════════════════════════════════════════════════════ */}
-        {tab === 'recipes' && (
-          <RecipeDiscovery
-            recipes={recipes}
-            familyId={fid}
-            supabase={supabase}
-            onAdded={() => { load(); showToast('✓ Recipe added to Family OS!'); }}
-          />
-        )}
+
       </div>
 
       {/* ── Sticky bottom bar when cart has items ── */}
