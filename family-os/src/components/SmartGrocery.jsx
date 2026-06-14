@@ -123,24 +123,40 @@ const TABS = [
   { id: 'recipes', label: '🍽️ Recipes'  },
 ];
 
-const RECIPE_QUICK_PICKS = [
-  'Dal Makhani', 'Paneer Butter Masala', 'Aloo Paratha', 'Chole Bhature',
-  'Rajma Chawal', 'Palak Paneer', 'Biryani', 'Idli Sambar',
-  'Poha', 'Upma', 'Khichdi', 'Pav Bhaji',
+const MEAL_SUGGESTIONS = [
+  { name: 'Poha',               cuisine: 'Indian',       tags: 'breakfast,quick',     icon: '🍚' },
+  { name: 'Upma',               cuisine: 'Indian',       tags: 'breakfast,quick',     icon: '🥣' },
+  { name: 'Aloo Paratha',       cuisine: 'Punjabi',      tags: 'breakfast,kids',      icon: '🫓' },
+  { name: 'Moong Dal Chilla',   cuisine: 'Indian',       tags: 'breakfast,healthy',   icon: '🥞' },
+  { name: 'Rava Idli',          cuisine: 'South Indian', tags: 'breakfast',           icon: '🫓' },
+  { name: 'Besan Cheela',       cuisine: 'Indian',       tags: 'breakfast,healthy',   icon: '🥞' },
+  { name: 'Sabudana Khichdi',   cuisine: 'Indian',       tags: 'breakfast,fasting',   icon: '🍚' },
+  { name: 'Dal Makhani',        cuisine: 'Punjabi',      tags: 'dinner,restaurant',   icon: '🫘' },
+  { name: 'Paneer Butter Masala', cuisine: 'Punjabi',    tags: 'dinner,kids',         icon: '🧀' },
+  { name: 'Chole Bhature',      cuisine: 'Punjabi',      tags: 'lunch,weekend',       icon: '🍛' },
+  { name: 'Rajma Chawal',       cuisine: 'Punjabi',      tags: 'lunch,comfort',       icon: '🫘' },
+  { name: 'Palak Paneer',       cuisine: 'Indian',       tags: 'dinner,healthy',      icon: '🥬' },
+  { name: 'Khichdi',            cuisine: 'Indian',       tags: 'dinner,kids,healthy', icon: '🍚' },
+  { name: 'Pav Bhaji',          cuisine: 'Mumbai',       tags: 'dinner,kids',         icon: '🍞' },
+  { name: 'Biryani',            cuisine: 'Mughlai',      tags: 'weekend,special',     icon: '🍛' },
+  { name: 'Baingan Bharta',     cuisine: 'Punjabi',      tags: 'dinner',              icon: '🍆' },
+  { name: 'Aloo Gobi',          cuisine: 'Indian',       tags: 'lunch,quick',         icon: '🥦' },
+  { name: 'Matar Paneer',       cuisine: 'Indian',       tags: 'dinner',              icon: '🧀' },
+  { name: 'Dal Tadka',          cuisine: 'Indian',       tags: 'lunch,healthy',       icon: '🫘' },
+  { name: 'Jeera Rice',         cuisine: 'Indian',       tags: 'lunch,quick',         icon: '🍚' },
+  { name: 'Idli Sambar',        cuisine: 'South Indian', tags: 'breakfast,kids',      icon: '🫓' },
+  { name: 'Masala Dosa',        cuisine: 'South Indian', tags: 'breakfast,weekend',   icon: '🌯' },
+  { name: 'Rava Dosa',          cuisine: 'South Indian', tags: 'breakfast,quick',     icon: '🌯' },
+  { name: 'Uttapam',            cuisine: 'South Indian', tags: 'breakfast',           icon: '🥞' },
+  { name: 'Pasta in White Sauce', cuisine: 'Italian',    tags: 'kids,dinner',         icon: '🍝' },
+  { name: 'Veg Sandwich',       cuisine: 'Snack',        tags: 'kids,quick',          icon: '🥪' },
+  { name: 'Paneer Frankie',     cuisine: 'Mumbai',       tags: 'kids,lunch',          icon: '🌯' },
+  { name: 'Quinoa Salad',       cuisine: 'Healthy',      tags: 'healthy,lunch',       icon: '🥗' },
+  { name: 'Sprouts Chaat',      cuisine: 'Indian',       tags: 'healthy,snack',       icon: '🌱' },
+  { name: 'Oats Upma',          cuisine: 'Healthy',      tags: 'healthy,breakfast',   icon: '🥣' },
+  { name: 'Lauki Soup',         cuisine: 'Healthy',      tags: 'healthy,dinner',      icon: '🍵' },
 ];
-const RECIPE_FILTERS = [
-  { label: '⚡ Quick (30 min)', value: 'quick easy 30 minutes' },
-  { label: '🥗 Healthy',        value: 'healthy low calorie'   },
-  { label: '👶 Kids Friendly',  value: 'kids friendly toddler' },
-  { label: '🌿 No Onion Garlic',value: 'no onion no garlic jain' },
-];
-const RECIPE_SITES = [
-  { label: 'Any',             value: '' },
-  { label: 'Hebbars Kitchen', value: 'hebbarskitchen.com' },
-  { label: "Archana's",       value: 'archanaskitchen.com' },
-  { label: 'Veg Recipes',     value: 'vegrecipesofindia.com' },
-  { label: 'YouTube',         value: 'youtube.com' },
-];
+const RECIPE_CUISINES = ['All','Indian','Punjabi','South Indian','Mumbai','Healthy','Kids','Italian'];
 
 // ════════════════════════════════════════════════════════════════════════════
 export default function SmartGrocery({ familyId }) {
@@ -707,99 +723,16 @@ export default function SmartGrocery({ familyId }) {
         )}
 
         {/* ══════════════════════════════════════════════════════════════════
-            TAB: RECIPES
+            TAB: RECIPES — Discover & Log New Meals
         ══════════════════════════════════════════════════════════════════ */}
         {tab === 'recipes' && (
-          <div style={{ paddingBottom: 20 }}>
-
-            {/* Search card */}
-            <div style={{ background: C.cardBg, borderRadius: 14, padding: 16, marginBottom: 12, border: `1px solid ${C.border}` }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: C.text3, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                Search Recipe on Google
-              </div>
-
-              {/* Input + button */}
-              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                <input
-                  value={recipeQuery}
-                  onChange={e => setRecipeQuery(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key !== 'Enter' || !recipeQuery.trim()) return;
-                    let q = recipeQuery.trim() + ' recipe';
-                    if (recipeFilters.length) q += ' ' + recipeFilters.join(' ');
-                    const base = recipeSite ? 'site:' + recipeSite + ' ' + q : q;
-                    window.open('https://www.google.com/search?q=' + encodeURIComponent(base), '_blank');
-                  }}
-                  placeholder="e.g. Dal Tadka, Khichdi, Poha..."
-                  style={{ ...S.inp, flex: 1 }}
-                />
-                <button
-                  onClick={() => {
-                    if (!recipeQuery.trim()) return;
-                    let q = recipeQuery.trim() + ' recipe';
-                    if (recipeFilters.length) q += ' ' + recipeFilters.join(' ');
-                    const base = recipeSite ? 'site:' + recipeSite + ' ' + q : q;
-                    window.open('https://www.google.com/search?q=' + encodeURIComponent(base), '_blank');
-                  }}
-                  style={{ ...S.btn, padding: '10px 16px', fontSize: 18 }}
-                >🔍</button>
-              </div>
-
-              {/* Filter chips */}
-              <div style={{ fontSize: 11, fontWeight: 700, color: C.text3, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>Filters</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-                {RECIPE_FILTERS.map(f => {
-                  const active = recipeFilters.includes(f.value);
-                  return (
-                    <button key={f.value}
-                      onClick={() => setRecipeFilters(prev =>
-                        prev.includes(f.value) ? prev.filter(x => x !== f.value) : [...prev, f.value]
-                      )}
-                      style={{ padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: active ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${active ? C.accent : C.border}`, background: active ? C.accentL : C.cardBg, color: active ? C.accent : C.text2 }}>
-                      {active ? '✓ ' : ''}{f.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Site selector */}
-              <div style={{ fontSize: 11, fontWeight: 700, color: C.text3, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>Search On</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {RECIPE_SITES.map(s => {
-                  const active = recipeSite === s.value;
-                  return (
-                    <button key={s.value} onClick={() => setRecipeSite(s.value)}
-                      style={{ padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: active ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${active ? C.accent : C.border}`, background: active ? C.accent : C.cardBg, color: active ? '#fff' : C.text2 }}>
-                      {s.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Quick picks */}
-            <div style={{ background: C.cardBg, borderRadius: 14, padding: 16, border: `1px solid ${C.border}` }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: C.text3, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>⚡ Quick Search</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {RECIPE_QUICK_PICKS.map(meal => (
-                  <button key={meal}
-                    onClick={() => {
-                      let q = meal + ' recipe';
-                      if (recipeFilters.length) q += ' ' + recipeFilters.join(' ');
-                      const base = recipeSite ? 'site:' + recipeSite + ' ' + q : q;
-                      window.open('https://www.google.com/search?q=' + encodeURIComponent(base), '_blank');
-                    }}
-                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 14px', borderRadius: 10, border: `1px solid ${C.border}`, background: C.pageBg, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
-                    <span style={{ fontSize: 14, color: C.text1, fontWeight: 500 }}>🍽️ {meal}</span>
-                    <span style={{ fontSize: 16, color: C.accent }}>→</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-          </div>
+          <RecipeDiscovery
+            recipes={recipes}
+            familyId={fid}
+            supabase={supabase}
+            onAdded={() => { load(); showToast('✓ Recipe added to Family OS!'); }}
+          />
         )}
-
       </div>
 
       {/* ── Sticky bottom bar when cart has items ── */}
@@ -818,6 +751,163 @@ export default function SmartGrocery({ familyId }) {
   );
 }
 // cache bust Wed Jun 10 09:24:28 UTC 2026
+
+// ════════════════════════════════════════════════════════════════════════════
+// RecipeDiscovery — find new meals & log them to Family OS DB
+// ════════════════════════════════════════════════════════════════════════════
+function RecipeDiscovery({ recipes, familyId, supabase, onAdded }) {
+  const [search, setSearch]           = React.useState('');
+  const [cuisine, setCuisine]         = React.useState('All');
+  const [showNewOnly, setShowNewOnly] = React.useState(false);
+  const [adding, setAdding]           = React.useState(null);
+  const [form, setForm]               = React.useState({ name: '', cuisine: 'Indian', tags: '', notes: '' });
+  const [saving, setSaving]           = React.useState(false);
+  const [showManual, setShowManual]   = React.useState(false);
+
+  const existingNames = React.useMemo(() =>
+    new Set((recipes || []).map(r => r.name.toLowerCase().trim()))
+  , [recipes]);
+
+  const isNew = meal => !existingNames.has(meal.name.toLowerCase().trim());
+
+  const filtered = React.useMemo(() => {
+    let list = MEAL_SUGGESTIONS;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(m => m.name.toLowerCase().includes(q) || m.tags.includes(q) || m.cuisine.toLowerCase().includes(q));
+    }
+    if (cuisine !== 'All') list = list.filter(m => m.cuisine === cuisine || m.tags.includes(cuisine.toLowerCase()));
+    if (showNewOnly) list = list.filter(m => isNew(m));
+    return list;
+  }, [search, cuisine, showNewOnly, existingNames]);
+
+  const newCount = MEAL_SUGGESTIONS.filter(m => isNew(m)).length;
+
+  const addToDB = async (meal) => {
+    setSaving(true); setAdding(meal.name);
+    await supabase.from('recipes').insert({
+      family_id: familyId, name: meal.name, cuisine_type: meal.cuisine,
+      tags: meal.tags, prep_time_minutes: 30, is_vegetarian: true, notes: '',
+    });
+    setSaving(false); setAdding(null); onAdded();
+  };
+
+  const addManualToDB = async () => {
+    if (!form.name.trim()) return;
+    setSaving(true);
+    await supabase.from('recipes').insert({
+      family_id: familyId, name: form.name.trim(), cuisine_type: form.cuisine,
+      tags: form.tags, prep_time_minutes: 30, is_vegetarian: true, notes: form.notes,
+    });
+    setSaving(false);
+    setForm({ name: '', cuisine: 'Indian', tags: '', notes: '' });
+    setShowManual(false); onAdded();
+  };
+
+  const C2 = {
+    accent: '#7c3aed', accentL: '#ede9fe', border: '#e5e7eb',
+    cardBg: '#ffffff', pageBg: '#f3f4f6', text1: '#111827',
+    text2: '#374151', text3: '#6b7280', green: '#15803d', greenL: '#dcfce7',
+  };
+
+  return (
+    <div style={{ paddingBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
+        {[
+          { l: 'In DB',      v: (recipes||[]).length,     c: C2.accent },
+          { l: 'Not in DB',  v: newCount,                 c: '#d97706' },
+          { l: 'Total',      v: MEAL_SUGGESTIONS.length,  c: C2.green  },
+        ].map(s => (
+          <div key={s.l} style={{ background: C2.cardBg, borderRadius: 10, padding: '10px 8px', textAlign: 'center', border: `1px solid ${C2.border}` }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: s.c }}>{s.v}</div>
+            <div style={{ fontSize: 10, color: C2.text3, marginTop: 2 }}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ background: C2.cardBg, borderRadius: 14, padding: 14, marginBottom: 12, border: `1px solid ${C2.border}` }}>
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search meals... (Paratha, Dosa, Pasta)"
+          style={{ width: '100%', padding: '10px 13px', borderRadius: 10, border: `1px solid ${C2.border}`, fontSize: 14, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', marginBottom: 10 }} />
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 6, marginBottom: 8 }}>
+          {RECIPE_CUISINES.map(c => (
+            <button key={c} onClick={() => setCuisine(c)}
+              style={{ padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: cuisine === c ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', border: `1px solid ${cuisine === c ? C2.accent : C2.border}`, background: cuisine === c ? C2.accent : C2.cardBg, color: cuisine === c ? '#fff' : C2.text2 }}>
+              {c}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setShowNewOnly(p => !p)}
+          style={{ padding: '7px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${showNewOnly ? '#d97706' : C2.border}`, background: showNewOnly ? '#fef3c7' : C2.cardBg, color: showNewOnly ? '#92400e' : C2.text2 }}>
+          {showNewOnly ? '✓ ' : ''}⭐ Not in DB only ({newCount})
+        </button>
+      </div>
+
+      <button onClick={() => setShowManual(p => !p)}
+        style={{ width: '100%', padding: '11px', borderRadius: 12, border: `1.5px dashed ${C2.accent}`, background: C2.accentL, color: C2.accent, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 12 }}>
+        {showManual ? '✕ Cancel' : '✏️ + Add a custom meal not in the list'}
+      </button>
+
+      {showManual && (
+        <div style={{ background: C2.cardBg, borderRadius: 14, padding: 16, border: `1.5px solid ${C2.accent}`, marginBottom: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C2.accent, marginBottom: 12 }}>New Recipe</div>
+          <input value={form.name} onChange={e => setForm(p => ({...p, name: e.target.value}))}
+            placeholder="Meal name (e.g. Lauki Kofta)"
+            style={{ width: '100%', padding: '10px 13px', borderRadius: 10, border: `1px solid ${C2.border}`, fontSize: 14, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', marginBottom: 8 }} />
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <select value={form.cuisine} onChange={e => setForm(p => ({...p, cuisine: e.target.value}))}
+              style={{ flex: 1, padding: '10px 13px', borderRadius: 10, border: `1px solid ${C2.border}`, fontSize: 13, fontFamily: 'inherit', outline: 'none' }}>
+              {['Indian','Punjabi','South Indian','Mumbai','Healthy','Italian','Chinese','Other'].map(c => <option key={c}>{c}</option>)}
+            </select>
+            <input value={form.tags} onChange={e => setForm(p => ({...p, tags: e.target.value}))}
+              placeholder="Tags (breakfast,kids)"
+              style={{ flex: 1, padding: '10px 13px', borderRadius: 10, border: `1px solid ${C2.border}`, fontSize: 13, fontFamily: 'inherit', outline: 'none' }} />
+          </div>
+          <input value={form.notes} onChange={e => setForm(p => ({...p, notes: e.target.value}))}
+            placeholder="Notes (optional)"
+            style={{ width: '100%', padding: '10px 13px', borderRadius: 10, border: `1px solid ${C2.border}`, fontSize: 13, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', marginBottom: 10 }} />
+          <button onClick={addManualToDB} disabled={saving || !form.name.trim()}
+            style={{ width: '100%', padding: '11px', borderRadius: 10, border: 'none', background: saving ? '#a78bfa' : C2.accent, color: '#fff', fontSize: 14, fontWeight: 700, cursor: saving ? 'default' : 'pointer', fontFamily: 'inherit' }}>
+            {saving ? 'Saving...' : '+ Add to Family OS'}
+          </button>
+        </div>
+      )}
+
+      <div style={{ fontSize: 12, color: C2.text3, fontWeight: 600, marginBottom: 8 }}>
+        {filtered.length} meals · {filtered.filter(m => isNew(m)).length} not in DB
+      </div>
+
+      {filtered.map(meal => {
+        const inDB = !isNew(meal);
+        const isAdding = adding === meal.name;
+        return (
+          <div key={meal.name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderRadius: 12, border: `1px solid ${inDB ? '#86efac' : C2.border}`, marginBottom: 8, background: inDB ? '#f0fdf4' : C2.cardBg }}>
+            <div style={{ fontSize: 22, flexShrink: 0 }}>{meal.icon}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: C2.text1 }}>{meal.name}</span>
+                {inDB
+                  ? <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 20, background: C2.greenL, color: C2.green, fontWeight: 700 }}>✓ In DB</span>
+                  : <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 20, background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>New</span>}
+              </div>
+              <div style={{ fontSize: 12, color: C2.text3, marginTop: 2 }}>{meal.cuisine} · {meal.tags.split(',').join(' · ')}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              <button onClick={() => window.open('https://www.google.com/search?q=' + encodeURIComponent(meal.name + ' recipe'), '_blank')}
+                style={{ padding: '7px 10px', borderRadius: 9, border: `1px solid ${C2.border}`, background: C2.pageBg, color: C2.text2, fontSize: 13, cursor: 'pointer' }}>🔍</button>
+              {!inDB && (
+                <button onClick={() => addToDB(meal)} disabled={isAdding}
+                  style={{ padding: '7px 12px', borderRadius: 9, border: 'none', background: isAdding ? '#a78bfa' : C2.accent, color: '#fff', fontSize: 12, fontWeight: 700, cursor: isAdding ? 'default' : 'pointer', fontFamily: 'inherit' }}>
+                  {isAdding ? '...' : '+ Add'}
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 // ── PriceLogRow — editable price log entry ────────────────────────────────────
 function PriceLogRow({ h, onDelete, onEdit }) {
