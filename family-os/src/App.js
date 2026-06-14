@@ -4502,8 +4502,8 @@ const KitchenScreen = ({ familyId }) => {
 
   const getWeekDates = () => {
     const d = new Date();
-    return Array.from({ length: 7 }, (_, i) => {
-      const dd = new Date(d); dd.setDate(d.getDate() + i);
+    return Array.from({ length: 10 }, (_, i) => {
+      const dd = new Date(d); dd.setDate(d.getDate() - 3 + i);
       return dd.toISOString().split("T")[0];
     });
   };
