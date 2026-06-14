@@ -120,6 +120,26 @@ const TABS = [
   { id: 'cart',    label: '🛒 Cart'     },
   { id: 'compare', label: '⚡ Compare'  },
   { id: 'history', label: '📋 History'  },
+  { id: 'recipes', label: '🍽️ Recipes'  },
+];
+
+const RECIPE_QUICK_PICKS = [
+  'Dal Makhani', 'Paneer Butter Masala', 'Aloo Paratha', 'Chole Bhature',
+  'Rajma Chawal', 'Palak Paneer', 'Biryani', 'Idli Sambar',
+  'Poha', 'Upma', 'Khichdi', 'Pav Bhaji',
+];
+const RECIPE_FILTERS = [
+  { label: '⚡ Quick (30 min)', value: 'quick easy 30 minutes' },
+  { label: '🥗 Healthy',        value: 'healthy low calorie'   },
+  { label: '👶 Kids Friendly',  value: 'kids friendly toddler' },
+  { label: '🌿 No Onion Garlic',value: 'no onion no garlic jain' },
+];
+const RECIPE_SITES = [
+  { label: 'Any',             value: '' },
+  { label: 'Hebbars Kitchen', value: 'hebbarskitchen.com' },
+  { label: "Archana's",       value: 'archanaskitchen.com' },
+  { label: 'Veg Recipes',     value: 'vegrecipesofindia.com' },
+  { label: 'YouTube',         value: 'youtube.com' },
 ];
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -132,6 +152,9 @@ export default function SmartGrocery({ familyId }) {
   const [recipes, setRecipes]     = useState([]);
   const [recipeIngr, setRecipeIngr] = useState([]);
   const [cart, setCart]           = useState([]);            // [{item, suggestedQty}]
+  const [recipeQuery, setRecipeQuery]     = useState('');
+  const [recipeFilters, setRecipeFilters] = useState([]);
+  const [recipeSite, setRecipeSite]       = useState('');
   const [compareRes, setCompareRes] = useState(null);
   const [loading, setLoading]     = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -681,6 +704,100 @@ export default function SmartGrocery({ familyId }) {
               </>
             )}
           </>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════
+            TAB: RECIPES
+        ══════════════════════════════════════════════════════════════════ */}
+        {tab === 'recipes' && (
+          <div style={{ paddingBottom: 20 }}>
+
+            {/* Search card */}
+            <div style={{ background: C.cardBg, borderRadius: 14, padding: 16, marginBottom: 12, border: `1px solid ${C.border}` }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.text3, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Search Recipe on Google
+              </div>
+
+              {/* Input + button */}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                <input
+                  value={recipeQuery}
+                  onChange={e => setRecipeQuery(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key !== 'Enter' || !recipeQuery.trim()) return;
+                    let q = recipeQuery.trim() + ' recipe';
+                    if (recipeFilters.length) q += ' ' + recipeFilters.join(' ');
+                    const base = recipeSite ? 'site:' + recipeSite + ' ' + q : q;
+                    window.open('https://www.google.com/search?q=' + encodeURIComponent(base), '_blank');
+                  }}
+                  placeholder="e.g. Dal Tadka, Khichdi, Poha..."
+                  style={{ ...S.inp, flex: 1 }}
+                />
+                <button
+                  onClick={() => {
+                    if (!recipeQuery.trim()) return;
+                    let q = recipeQuery.trim() + ' recipe';
+                    if (recipeFilters.length) q += ' ' + recipeFilters.join(' ');
+                    const base = recipeSite ? 'site:' + recipeSite + ' ' + q : q;
+                    window.open('https://www.google.com/search?q=' + encodeURIComponent(base), '_blank');
+                  }}
+                  style={{ ...S.btn, padding: '10px 16px', fontSize: 18 }}
+                >🔍</button>
+              </div>
+
+              {/* Filter chips */}
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.text3, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>Filters</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+                {RECIPE_FILTERS.map(f => {
+                  const active = recipeFilters.includes(f.value);
+                  return (
+                    <button key={f.value}
+                      onClick={() => setRecipeFilters(prev =>
+                        prev.includes(f.value) ? prev.filter(x => x !== f.value) : [...prev, f.value]
+                      )}
+                      style={{ padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: active ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${active ? C.accent : C.border}`, background: active ? C.accentL : C.cardBg, color: active ? C.accent : C.text2 }}>
+                      {active ? '✓ ' : ''}{f.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Site selector */}
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.text3, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 7 }}>Search On</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {RECIPE_SITES.map(s => {
+                  const active = recipeSite === s.value;
+                  return (
+                    <button key={s.value} onClick={() => setRecipeSite(s.value)}
+                      style={{ padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: active ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', border: `1.5px solid ${active ? C.accent : C.border}`, background: active ? C.accent : C.cardBg, color: active ? '#fff' : C.text2 }}>
+                      {s.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Quick picks */}
+            <div style={{ background: C.cardBg, borderRadius: 14, padding: 16, border: `1px solid ${C.border}` }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.text3, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>⚡ Quick Search</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {RECIPE_QUICK_PICKS.map(meal => (
+                  <button key={meal}
+                    onClick={() => {
+                      let q = meal + ' recipe';
+                      if (recipeFilters.length) q += ' ' + recipeFilters.join(' ');
+                      const base = recipeSite ? 'site:' + recipeSite + ' ' + q : q;
+                      window.open('https://www.google.com/search?q=' + encodeURIComponent(base), '_blank');
+                    }}
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 14px', borderRadius: 10, border: `1px solid ${C.border}`, background: C.pageBg, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+                    <span style={{ fontSize: 14, color: C.text1, fontWeight: 500 }}>🍽️ {meal}</span>
+                    <span style={{ fontSize: 16, color: C.accent }}>→</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </div>
         )}
 
       </div>
