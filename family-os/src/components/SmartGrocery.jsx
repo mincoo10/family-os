@@ -756,21 +756,21 @@ export default function SmartGrocery({ familyId }) {
 // RecipeDiscovery — find new meals & log them to Family OS DB
 // ════════════════════════════════════════════════════════════════════════════
 function RecipeDiscovery({ recipes, familyId, supabase, onAdded }) {
-  const [search, setSearch]           = React.useState('');
-  const [cuisine, setCuisine]         = React.useState('All');
-  const [showNewOnly, setShowNewOnly] = React.useState(false);
-  const [adding, setAdding]           = React.useState(null);
-  const [form, setForm]               = React.useState({ name: '', cuisine: 'Indian', tags: '', notes: '' });
-  const [saving, setSaving]           = React.useState(false);
-  const [showManual, setShowManual]   = React.useState(false);
+  const [search, setSearch]           = useState('');
+  const [cuisine, setCuisine]         = useState('All');
+  const [showNewOnly, setShowNewOnly] = useState(false);
+  const [adding, setAdding]           = useState(null);
+  const [form, setForm]               = useState({ name: '', cuisine: 'Indian', tags: '', notes: '' });
+  const [saving, setSaving]           = useState(false);
+  const [showManual, setShowManual]   = useState(false);
 
-  const existingNames = React.useMemo(() =>
+  const existingNames = useMemo(() =>
     new Set((recipes || []).map(r => r.name.toLowerCase().trim()))
   , [recipes]);
 
   const isNew = meal => !existingNames.has(meal.name.toLowerCase().trim());
 
-  const filtered = React.useMemo(() => {
+  const filtered = useMemo(() => {
     let list = MEAL_SUGGESTIONS;
     if (search.trim()) {
       const q = search.toLowerCase();
